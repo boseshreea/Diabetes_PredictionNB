@@ -1,1 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f7f7f7;
+        }
+        .container {
+            width: 300px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+            text-align: left;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Diabetes Prediction</h2>
+        
+        <label for="glucose">Blood Sugar (Glucose) Level</label>
+        <input type="number" id="glucose" required>
+
+        <label for="insulin">Insulin Level</label>
+        <input type="number" id="insulin" required>
+
+        <label for="bmi">BMI</label>
+        <input type="number" id="bmi" required>
+
+        <label for="age">Age</label>
+        <input type="number" id="age" required>
+
+        <button onclick="predictDiabetes()">Predict Diabetes Type</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function predictDiabetes() {
+            // Get input values in correct order: [glucose, insulin, bmi, age]
+            const glucose = parseFloat(document.getElementById('glucose').value);
+            const insulin = parseFloat(document.getElementById('insulin').value);
+            const bmi = parseFloat(document.getElementById('bmi').value);
+            const age = parseFloat(document.getElementById('age').value);
+
+            // Validate inputs
+            if (isNaN(glucose) || isNaN(insulin) || isNaN(bmi) || isNaN(age)) {
+                document.getElementById('result').innerText = 'Please enter valid numeric values.';
+                return;
+            }
+
+            // Create payload in the correct order
+            const data = { features: [glucose, insulin, bmi, age] };
+
+            // Send POST request to the backend
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Check if both predictions are present
+                if (data.naive_bayes_prediction !== undefined && data.perceptron_prediction !== undefined) {
+                    let resultText = '';
+
+                    // Map Naive Bayes prediction to human-readable text
+                    if (data.naive_bayes_prediction === 0) {
+                        resultText += "Naive Bayes Prediction: No Diabetes\n";
+                    } else {
+                        resultText += "Naive Bayes Prediction: Diabetes\n";
+                    }
+
+                    // Map Perceptron prediction to human-readable text
+                    if (data.perceptron_prediction === 0) {
+                        resultText += "Perceptron Prediction: No Diabetes";
+                    } else {
+                        resultText += "Perceptron Prediction: Diabetes";
+                    }
+
+                    // Display both predictions
+                    document.getElementById('result').innerText = resultText;
+                } else {
+                    document.getElementById('result').innerText = 'Error: Prediction not found in response.';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerText = 'Error making prediction.';
+            });
+        }
+    </script>
+</body>
+</html>
 
