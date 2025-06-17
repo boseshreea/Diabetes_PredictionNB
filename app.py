@@ -4,7 +4,7 @@
 # In[ ]:
 
 
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, render_template
 import numpy as np
 import pickle
 from Models import load_models
@@ -43,7 +43,8 @@ def predict():
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 10000))  # default to 5000 if not set
+    port = int(os.environ.get('PORT', 10000))  
+    print(f"Starting app on port {port}")
     app.run(host='0.0.0.0', port=port)
 
 
